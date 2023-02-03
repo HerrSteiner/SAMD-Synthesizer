@@ -8,8 +8,7 @@ struct OscData {
   // everything phase related
   float inc = 0.f;
   float phase_accumulator = 0.f;
-  uint16_t phaseInt = 0;
-
+  
   // the rest
   float waveform1 = 1;
   float waveform2 = 0;
@@ -59,14 +58,10 @@ void tcConfigure(int sampleRate) {
 
 void TC4_Handler() {
   
-  signed int value1, value2;
-    uint16_t indexBase;
-    float indexFract;
-    float modSample1 = 0.f;
-    float modSample2 = 0.f;
-
-    float sample1 = 0.f;
+    float value1, value2;
+    uint16_t tableIndex;
     
+    float sample1 = 0.f;
     float accumulator;
     
     // -------- osc 1 ---------------------
@@ -80,16 +75,12 @@ void TC4_Handler() {
       accumulator -= wave_max;
     }
 
-    indexBase = accumulator;
-    uint16_t v1 = sintable[indexBase];
-        
-    uint16_t sample = v1;
-
-    v1 = sintable2[indexBase];
-    uint16_t sampleT = v1;
-
+    tableIndex = accumulator; // implicite conversion
+    value1 = sintable[tableIndex];
+    value2 = sintable2[tableIndex];
+    
     osc1.phase_accumulator = accumulator;
-    sample1 = (sample * osc1.waveform1 + sampleT * osc1.waveform2);
+    sample1 = (value1 * osc1.waveform1 + value2 * osc1.waveform2);
 
     // -------- osc 2 ---------------------
     accumulator = osc2.phase_accumulator;    
@@ -103,16 +94,12 @@ void TC4_Handler() {
       accumulator -= wave_max;
     }
 
-    indexBase = accumulator;
-    v1 = sintable[indexBase];
-       
-    sample = v1;
-
-    v1 = sintable2[indexBase];
-    sampleT = v1;
-
+    tableIndex = accumulator;
+    value1 = sintable[tableIndex];  
+    value2 = sintable2[tableIndex];
+    
     osc2.phase_accumulator = accumulator;
-    sample2 = (sample * osc2.waveform1 + sampleT * osc2.waveform2);
+    sample2 = (value1 * osc2.waveform1 + value2 * osc2.waveform2);
      
     DAC->DATA.reg =  (sample1*osc1.volume + sample2*osc2.volume);
 
@@ -129,12 +116,12 @@ const float incFactor = WAVE_TABLE_SIZE / SAMPLE_RATE;
 void loop() {
   counter++;
 
-  if (counter > 100) {
+  if (counter > 100) { // we not so often sample the inputs but I don't want to use delay() which might interact with the interrupt
     // ===================================================
     // reading the inputs
     // ===================================================
 
-    uint16_t frequency = analogRead(A1)*2 + analogRead(A4);// A4 = analog feedback
+    uint16_t frequency = analogRead(A1)*2;// + analogRead(A4);// A4 = analog feedback
     osc1.inc = frequency * incFactor;
 
     float waveform = analogRead(A2) / 4095.f;
@@ -147,7 +134,7 @@ void loop() {
     osc1.volume = analogRead(5) / 8190.f;
 
     
-    frequency = analogRead(A6)*2 + analogRead(A9);// A9 = analog feedback
+    frequency = analogRead(A6)*2;// + analogRead(A9);// A9 = analog feedback
     osc2.inc = frequency * incFactor;
     
     waveform = analogRead(A7) / 4095.f;
