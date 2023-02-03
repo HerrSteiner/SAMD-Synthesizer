@@ -2,7 +2,7 @@
 #include "wavetables.h"
 
 #define SAMPLE_RATE 96000.f
-#define WAVE_TABLE_SIZE 4096
+#define WAVE_TABLE_SIZE 8192
 
 struct OscData {
   // everything phase related
