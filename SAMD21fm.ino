@@ -96,7 +96,7 @@ void TC4_Handler() {
 
     tableIndex = accumulator;
     value1 = sintable[tableIndex];  
-    value2 = sintable2[tableIndex];
+    value2 = sawtable[tableIndex];
     
     osc2.phase_accumulator = accumulator;
     sample2 = (value1 * osc2.waveform1 + value2 * osc2.waveform2);
@@ -121,7 +121,7 @@ void loop() {
     // reading the inputs
     // ===================================================
 
-    uint16_t frequency = analogRead(A1)*2;// + analogRead(A4);// A4 = analog feedback
+    uint16_t frequency = analogRead(A1)*2 + analogRead(A4);// A4 = analog feedback
     osc1.inc = frequency * incFactor;
 
     float waveform = analogRead(A2) / 4095.f;
@@ -134,7 +134,7 @@ void loop() {
     osc1.volume = analogRead(5) / 8190.f;
 
     
-    frequency = analogRead(A6)*2;// + analogRead(A9);// A9 = analog feedback
+    frequency = analogRead(A6)*2 + analogRead(A9);// A9 = analog feedback
     osc2.inc = frequency * incFactor;
     
     waveform = analogRead(A7) / 4095.f;
