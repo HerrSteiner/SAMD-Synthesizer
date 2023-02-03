@@ -11,8 +11,8 @@ struct OscData {
   uint16_t phaseInt = 0;
 
   // the rest
-  uint16_t waveform1 = 4095;
-  uint16_t waveform2 = 0;
+  float waveform1 = 1;
+  float waveform2 = 0;
 
   uint16_t crossFMint = 0;
   float crossFM = 0.f;
@@ -74,7 +74,7 @@ void TC4_Handler() {
     accumulator += osc1.inc;
     
     if (osc2.crossFMint > 2) {
-      accumulator += (sample2 * osc2.crossFM) / 1023.f;
+      accumulator += (sample2 * osc2.crossFM);
     }
     if (accumulator > wave_max) {
       accumulator -= wave_max;
@@ -82,23 +82,21 @@ void TC4_Handler() {
 
     indexBase = accumulator;
     uint16_t v1 = sintable[indexBase];
-    float wave1 = osc1.waveform1 / 4095.f;
-    float wave2 = osc1.waveform2 / 4095.f;
-    
+        
     uint16_t sample = v1;
 
     v1 = sintable2[indexBase];
     uint16_t sampleT = v1;
 
     osc1.phase_accumulator = accumulator;
-    sample1 = (sample * wave1 + sampleT * wave2);
+    sample1 = (sample * osc1.waveform1 + sampleT * osc1.waveform2);
 
     // -------- osc 2 ---------------------
     accumulator = osc2.phase_accumulator;    
     accumulator += osc2.inc;
     
     if (osc1.crossFMint > 2) {
-      accumulator += (sample1 * osc1.crossFM) / 1023.f;
+      accumulator += (sample1 * osc1.crossFM);
     }
 
     if (accumulator > wave_max) {
@@ -107,18 +105,16 @@ void TC4_Handler() {
 
     indexBase = accumulator;
     v1 = sintable[indexBase];
-    wave1 = osc2.waveform1 / 4095.f;
-    wave2 = osc2.waveform2 / 4095.f;
-    
+       
     sample = v1;
 
     v1 = sintable2[indexBase];
     sampleT = v1;
 
     osc2.phase_accumulator = accumulator;
-    sample2 = (sample * wave1 + sampleT * wave2);
+    sample2 = (sample * osc2.waveform1 + sampleT * osc2.waveform2);
      
-    DAC->DATA.reg =  (sample1*osc1.volume + sample2*osc2.volume) * 0.5f;
+    DAC->DATA.reg =  (sample1*osc1.volume + sample2*osc2.volume);
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;  // Clear the interrupt flag
 }
@@ -141,27 +137,27 @@ void loop() {
     uint16_t frequency = analogRead(A1)*2 + analogRead(A4);// A4 = analog feedback
     osc1.inc = frequency * incFactor;
 
-    uint16_t waveform = analogRead(A2);
+    float waveform = analogRead(A2) / 4095.f;
     osc1.waveform2 = waveform;
-    osc1.waveform1 = 4095 - waveform;
+    osc1.waveform1 = 1.f - waveform;
 
     uint16_t cross = analogRead(A3);
     osc1.crossFMint = cross;
-    osc1.crossFM = cross / 2.f;
-    osc1.volume = analogRead(5) / 4095.f;
+    osc1.crossFM = cross / 2046.f;
+    osc1.volume = analogRead(5) / 8190.f;
 
     
     frequency = analogRead(A6)*2 + analogRead(A9);// A9 = analog feedback
     osc2.inc = frequency * incFactor;
     
-    waveform = analogRead(A7);
+    waveform = analogRead(A7) / 4095.f;
     osc2.waveform2 = waveform;
-    osc2.waveform1 = 4095 - waveform;
+    osc2.waveform1 = 1.f - waveform;
 
     cross = analogRead(A8);
     osc2.crossFMint = cross;
-    osc2.crossFM = cross / 2.f;
-    osc2.volume = analogRead(10) / 4095.f;
+    osc2.crossFM = cross / 2046.f;
+    osc2.volume = analogRead(10) / 8190.f;
   
     counter = 0;
   }
