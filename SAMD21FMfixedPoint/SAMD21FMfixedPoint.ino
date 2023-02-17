@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "wavetablesFixedPoint.h"
 
-#define SAMPLE_RATE 96000
+#define SAMPLE_RATE 48000
 #define WAVE_TABLE_SIZE 8192
 
 const uint32_t maxAnalogIn = 4095;
@@ -122,13 +122,13 @@ void TC4_Handler() {
 // MAIN LOOP
 // ======================================================
 
-uint8_t counter = 0;
+uint16_t counter = 0;
 //const uint16_t incFactor = WAVE_TABLE_SIZE / SAMPLE_RATE;
 
 void loop() {
   counter++;
 
-  if (counter > 10) { // we not so often sample the inputs but I don't want to use delay() which might interact with the interrupt
+  if (counter > 1000) { // we not so often sample the inputs but I don't want to use delay() which might interact with the interrupt
     // ===================================================
     // reading the inputs
     // ===================================================
