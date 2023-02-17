@@ -77,18 +77,18 @@ void TC4_Handler() {
     }
 
     //if (osc2.crossFM > 2) {
-      accumulator += ((sample2 * osc2.crossFM)/maxAnalogIn) * shiftfactor;
+      accumulator += ((sample2 * osc2.crossFM)/maxAnalogIn) << 10;//* shiftfactor;
       if (accumulator >= wave_max_shifted) {
         accumulator -= wave_max_shifted;
       }
     //}
 
-    tableIndex = accumulator / shiftfactor;
+    tableIndex = accumulator >> 10;// / shiftfactor;
     value1 = sinetable[tableIndex];
     value2 = sine2table[tableIndex];
     
     osc1.phase_accumulator = accumulator;
-    sample1 = (value1 * osc1.waveform1 / 64 + value2 * osc1.waveform2 / 64) / maxAnalogIn;
+    sample1 = ( ((value1 * osc1.waveform1) >> 6 ) + ((value2 * osc1.waveform2) >> 6)) / maxAnalogIn;
 
     // -------- osc 2 ---------------------
     accumulator = osc2.phase_accumulator;    
@@ -100,20 +100,20 @@ void TC4_Handler() {
 
     //if (osc1.crossFM > 2) {
       
-      accumulator += ((sample1 * osc1.crossFM)/maxAnalogIn)*shiftfactor;
+      accumulator += ((sample1 * osc1.crossFM)/maxAnalogIn) << 10;//*shiftfactor;
       if (accumulator >= wave_max_shifted) {
         accumulator -= wave_max_shifted;
       }      
     //}
 
-    tableIndex = accumulator / shiftfactor;
+    tableIndex = accumulator >> 10; // / shiftfactor;
     value1 = sinetable[tableIndex];  
     value2 = sawtable[tableIndex];
     
     osc2.phase_accumulator = accumulator;
-    sample2 = (value1 * osc2.waveform1 / 64 + value2 * osc2.waveform2 / 64) / maxAnalogIn;
+    sample2 = (((value1 * osc2.waveform1) >> 6) + ((value2 * osc2.waveform2) >> 6)) / maxAnalogIn;
      
-    DAC->DATA.reg =  (sample1*osc1.volume + sample2*osc2.volume) / maxAnalogIn / 2;
+    DAC->DATA.reg =  ((sample1*osc1.volume + sample2*osc2.volume) / maxAnalogIn) >> 1;
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;  // Clear the interrupt flag
 }
@@ -134,7 +134,7 @@ void loop() {
     // ===================================================
 
     //uint32_t frequency = analogRead(A1) + analogRead(A4);// A4 = analog feedback
-    osc1.inc = (((analogRead(A1) * WAVE_TABLE_SIZE / 2) + (analogRead(A4) * WAVE_TABLE_SIZE)) / SAMPLE_RATE)*shiftfactor;
+    osc1.inc = ((((analogRead(A1) << 13) >> 1) + (analogRead(A4) << 13)) / SAMPLE_RATE) << 10;
 
     uint32_t waveform = analogRead(A2);
     osc1.waveform2 = waveform;
@@ -146,7 +146,7 @@ void loop() {
     
     //frequency = analogRead(A6) + analogRead(A9);// A9 = analog feedback
     //osc2.inc = ((frequency * WAVE_TABLE_SIZE) / SAMPLE_RATE) * shiftfactor;
-    osc2.inc = (((analogRead(A6) * WAVE_TABLE_SIZE / 2) + (analogRead(A9) * WAVE_TABLE_SIZE)) / SAMPLE_RATE)*shiftfactor;
+    osc2.inc = ((((analogRead(A6) << 13) >> 1) + (analogRead(A9) << 13)) / SAMPLE_RATE) << 10; // <<13 is the same as * WAVE_TABLE_SIZE
     
     waveform = analogRead(A7);
     osc2.waveform2 = waveform;
