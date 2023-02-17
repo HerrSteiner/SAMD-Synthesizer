@@ -76,13 +76,12 @@ void TC4_Handler() {
       accumulator -= wave_max_shifted;
     }
 
-    if (osc2.crossFM > 2) {
+    //if (osc2.crossFM > 2) {
       accumulator += ((sample2 * osc2.crossFM)/maxAnalogIn) * shiftfactor;
-    }
-
-    if (accumulator >= wave_max_shifted) {
-      accumulator -= wave_max_shifted;
-    }
+      if (accumulator >= wave_max_shifted) {
+        accumulator -= wave_max_shifted;
+      }
+    //}
 
     tableIndex = accumulator / shiftfactor;
     value1 = sinetable[tableIndex];
@@ -99,13 +98,13 @@ void TC4_Handler() {
       accumulator -= wave_max_shifted;
     }
 
-    if (osc1.crossFM > 2) {
+    //if (osc1.crossFM > 2) {
+      
       accumulator += ((sample1 * osc1.crossFM)/maxAnalogIn)*shiftfactor;
-    }
-
-    if (accumulator >= wave_max_shifted) {
-      accumulator -= wave_max_shifted;
-    }
+      if (accumulator >= wave_max_shifted) {
+        accumulator -= wave_max_shifted;
+      }      
+    //}
 
     tableIndex = accumulator / shiftfactor;
     value1 = sinetable[tableIndex];  
@@ -129,7 +128,7 @@ uint8_t counter = 0;
 void loop() {
   counter++;
 
-  if (counter > 100) { // we not so often sample the inputs but I don't want to use delay() which might interact with the interrupt
+  if (counter > 10) { // we not so often sample the inputs but I don't want to use delay() which might interact with the interrupt
     // ===================================================
     // reading the inputs
     // ===================================================
@@ -141,9 +140,7 @@ void loop() {
     osc1.waveform2 = waveform;
     osc1.waveform1 = maxAnalogIn - waveform;
 
-    uint32_t cross = analogRead(A3);
-    //osc1.crossFMint = cross;
-    osc1.crossFM = cross;
+    osc1.crossFM  = analogRead(A3);
     osc1.volume = analogRead(5);
 
     
@@ -155,9 +152,7 @@ void loop() {
     osc2.waveform2 = waveform;
     osc2.waveform1 = maxAnalogIn - waveform;
 
-    cross = analogRead(A8);
-    //osc2.crossFMint = cross;
-    osc2.crossFM = cross;
+    osc2.crossFM = analogRead(A8);
     osc2.volume = analogRead(10);
   
     counter = 0;
