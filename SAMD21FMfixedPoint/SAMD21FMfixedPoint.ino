@@ -76,14 +76,13 @@ void TC4_Handler() {
       accumulator -= wave_max_shifted;
     }
 
-    //if (osc2.crossFM > 2) {
-      accumulator += ((sample2 * osc2.crossFM)/maxAnalogIn) << 10;//* shiftfactor;
+      accumulator += (((sample2 * osc2.crossFM)/maxAnalogIn) << 10);
       if (accumulator >= wave_max_shifted) {
         accumulator -= wave_max_shifted;
       }
-    //}
+      
 
-    tableIndex = accumulator >> 10;// / shiftfactor;
+    tableIndex = accumulator >> 10;
     value1 = sinetable[tableIndex];
     value2 = sine2table[tableIndex];
     
@@ -98,15 +97,12 @@ void TC4_Handler() {
       accumulator -= wave_max_shifted;
     }
 
-    //if (osc1.crossFM > 2) {
-      
-      accumulator += ((sample1 * osc1.crossFM)/maxAnalogIn) << 10;//*shiftfactor;
+      accumulator += ((sample1 * osc1.crossFM)/maxAnalogIn) << 10;
       if (accumulator >= wave_max_shifted) {
         accumulator -= wave_max_shifted;
       }      
-    //}
-
-    tableIndex = accumulator >> 10; // / shiftfactor;
+    
+    tableIndex = accumulator >> 10;
     value1 = sinetable[tableIndex];  
     value2 = sawtable[tableIndex];
     
@@ -123,7 +119,6 @@ void TC4_Handler() {
 // ======================================================
 
 uint16_t counter = 0;
-//const uint16_t incFactor = WAVE_TABLE_SIZE / SAMPLE_RATE;
 
 void loop() {
   counter++;
@@ -132,10 +127,9 @@ void loop() {
     // ===================================================
     // reading the inputs
     // ===================================================
-
-    //uint32_t frequency = analogRead(A1) + analogRead(A4);// A4 = analog feedback
+    
     osc1.inc = ((((analogRead(A1) << 13) >> 1) + (analogRead(A4) << 13)) / SAMPLE_RATE) << 10;
-
+    
     uint32_t waveform = analogRead(A2);
     osc1.waveform2 = waveform;
     osc1.waveform1 = maxAnalogIn - waveform;
@@ -143,9 +137,6 @@ void loop() {
     osc1.crossFM  = analogRead(A3);
     osc1.volume = analogRead(5);
 
-    
-    //frequency = analogRead(A6) + analogRead(A9);// A9 = analog feedback
-    //osc2.inc = ((frequency * WAVE_TABLE_SIZE) / SAMPLE_RATE) * shiftfactor;
     osc2.inc = ((((analogRead(A6) << 13) >> 1) + (analogRead(A9) << 13)) / SAMPLE_RATE) << 10; // <<13 is the same as * WAVE_TABLE_SIZE
     
     waveform = analogRead(A7);
