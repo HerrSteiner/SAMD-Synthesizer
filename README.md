@@ -11,4 +11,6 @@ The pots control two oscillators with each the parameters frequency, waveform (o
 A video of the prototype in action can be seen at https://youtu.be/kiY89RPKTYg
 
 Its a quirky noise device with lot of interesting oddities, cross bleed etc which reminds on qualities of the EMS Synthi without me wanting to recreate one in this case. 
-The exciting thing is that this box doesn't contain much electronics.
+The exciting thing is that this box doesn't contain much electronics, basically a 6€ microcontroller running the whole show.
+
+It is programmed in the Arduino IDE with the appropriate board library installed, but it uses no further libraries because I wanted to have control and insight of what is going on. The SAMD21 is an ARM M0 device and has no floating point unit which means floating point calculations cost a lot of cycles. I started first with a version with reduced floating point operations which is still in the repository. I then ported to fixed point calculation and avoid so floats at all which improves a lot the performance. This version is to be preferred.
